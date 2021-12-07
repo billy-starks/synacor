@@ -1,0 +1,92 @@
+6027: jt [32768, 6035]
+6030: add [32768, 32769, 1]
+6034: ret []
+6035: jt [32769, 6048]
+6038: add [32768, 32768, 32767]
+6042: set [32769, 32775]
+6045: call [6027]
+6047: ret []
+6048: push [32768]
+6050: add [32769, 32769, 32767]
+6054: call [6027]
+6056: set [32769, 32768]
+6059: pop [32768]
+6061: add [32768, 32768, 32767]
+6065: call [6027]
+6067: ret []
+
+# 6027
+func():
+	if R1 != 0: #6035
+		if R2 != 0: #6048
+			# push R1
+			tmp = R1
+			R2 = R2 - 1
+			func()
+			R2 = R1 # From func
+			# pop R1
+			R1 = tmp
+			R1 = R1 - 1
+			func()
+			return
+		else: # 6038
+			R1 = R1 - 1
+			R2 = R8
+			func()
+			return
+	else: #6030
+		R1 = R2 + 1
+		return
+
+
+func(R1, R2):
+	if R1 != 0:
+		if R2 != 0:
+			old_R1 = R1
+			R1 = func(R1, R2 - 1)
+			R2 = R1
+			R1 = old_R1 - 1
+			return func(R1, R2)
+		else:
+			R1 = R1 - 1
+			R2 = R8
+			return func(R1, R2)
+	else:
+		return R2 + 1
+
+
+5483: set [32768, 4]
+5486: set [32769, 1]
+5489: call [6027]
+
+func(0, x) = x + 1
+func(x, 0) = func(x - 1, R8)
+func(x, y) = func(x - 1, func(x, y - 1))
+
+func(4, 1) = 6:
+func(3, func(4, 0)) = 6
+func(3, func(3, R8)) = 6; A = func(3, R8)
+func(3, A) = 6
+fund(2, B) = 6; B = func(3, A - 1)
+fund(1, C) = 6; C = func(2, B - 1)
+func(0, D) = 6; D = func(1, C - 1)
+
+D + 1 = 6 -> func(1, C - 1) = 5
+func(0, E) = 5; E = func(1, C - 2)
+
+E + 1 = 5  -> func(1, C - 2) = 4
+func(0, F) = 4; F - func(1, C - 3)
+
+F + 1 = 4 -> func(1, C - 3) = 3
+...
+func(1, C - 4) = 2
+func(1, C - 5) = 1
+func(0, G) = 1; G = func(1, C - 6)
+
+func(0, G) = 1 -> G + 1 = 1 -> G = 0
+
+func(1, C) = 6
+func(1, C - 1) = 5
+func(1, C - 2) = 4
+...
+func(1, C - 6) = 0
